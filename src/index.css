@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+:root {
+  --accent: #3b82f6;
+}
+
+/* Light mode overrides */
+html.light {
+  color-scheme: light;
+}
+
+html:not(.light) {
+  color-scheme: dark;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -19,24 +32,32 @@
   background: #4b5563;
 }
 
-/* Smooth transitions */
+html.light ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: #374151 transparent;
 }
 
-/* Code block styling */
-pre code {
-  font-size: 0.8rem;
-  line-height: 1.6;
+html.light * {
+  scrollbar-color: #d1d5db transparent;
 }
 
-/* Animation for pulse */
-@keyframes gentle-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+/* Smooth transitions */
+button, a, input, select, textarea {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
 }
 
-.animate-gentle-pulse {
-  animation: gentle-pulse 2s ease-in-out infinite;
+/* Selection color */
+::selection {
+  background: var(--accent);
+  color: white;
 }
