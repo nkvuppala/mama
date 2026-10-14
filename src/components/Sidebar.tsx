@@ -32,8 +32,8 @@ export default function Sidebar({ currentView, setCurrentView, totalUnread, acti
             ⚡
           </div>
           <div>
-            <h1 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>MailAgent</h1>
-            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Multi-Mailbox AI</p>
+            <h1 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>MAMA</h1>
+            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Multi-Account Mail Agent</p>
           </div>
         </div>
       </div>

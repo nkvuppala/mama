@@ -1,8 +1,8 @@
-# 🚀 MailAgent - Multi-Mailbox AI Email Manager
+# 🚀 MAMA - Multi-Account Mail Agent
 
 A powerful web application for managing multiple email accounts with AI-powered agents. Monitor up to 30 mailboxes across Gmail, Outlook, IMAP, and more - each with its own named agent that can read, reply, schedule, escalate, and organize emails automatically.
 
-![MailAgent](https://img.shields.io/badge/React-18.3-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8) ![Vite](https://img.shields.io/badge/Vite-6.0-646cff)
+![MAMA](https://img.shields.io/badge/React-18.3-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8) ![Vite](https://img.shields.io/badge/Vite-6.0-646cff)
 
 ## ✨ Features
 
@@ -61,8 +61,8 @@ A powerful web application for managing multiple email accounts with AI-powered 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mailagent.git
-cd mailagent
+git clone https://github.com/yourusername/mama.git
+cd mama
 
 # Install dependencies
 npm install
@@ -158,7 +158,7 @@ npm run preview
 ## 📁 Project Structure
 
 ```
-mailagent/
+mama/
 ├── src/
 │   ├── components/
 │   │   ├── Sidebar.tsx          # Navigation sidebar
@@ -269,7 +269,7 @@ interface ThemeConfig {
 1. Go to [github.com](https://github.com)
 2. Click **+ New repository**
 3. Fill in:
-   - **Repository name**: `mailagent`
+   - **Repository name**: `mama`
    - **Description**: "Multi-Mailbox AI Email Manager"
    - **Public** or **Private**
    - **Don't** initialize with README (we already have one)
@@ -285,10 +285,10 @@ git init
 git add .
 
 # Create first commit
-git commit -m "Initial commit: MailAgent multi-mailbox AI email manager"
+git commit -m "Initial commit: MAMA multi-account mail agent"
 
 # Add GitHub remote (replace with your username)
-git remote add origin https://github.com/YOUR_USERNAME/mailagent.git
+git remote add origin https://github.com/YOUR_USERNAME/mama.git
 
 # Push to GitHub
 git branch -M main
@@ -302,7 +302,7 @@ git push -u origin main
 git remote -v
 
 # Change remote URL
-git remote set-url origin https://github.com/YOUR_USERNAME/mailagent.git
+git remote set-url origin https://github.com/YOUR_USERNAME/mama.git
 ```
 
 ### Step 4: Deploy to GitHub Pages (Optional)
@@ -315,7 +315,7 @@ npm install --save-dev gh-pages
 2. Add to `package.json`:
 ```json
 {
-  "homepage": "https://YOUR_USERNAME.github.io/mailagent",
+  "homepage": "https://YOUR_USERNAME.github.io/mama",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
@@ -326,7 +326,7 @@ npm install --save-dev gh-pages
 3. Update `vite.config.ts`:
 ```typescript
 export default defineConfig({
-  base: '/mailagent/',
+  base: '/mama/',
   // ... rest of config
 })
 ```
@@ -336,7 +336,7 @@ export default defineConfig({
 npm run deploy
 ```
 
-5. Your site will be live at: `https://YOUR_USERNAME.github.io/mailagent/`
+5. Your site will be live at: `https://YOUR_USERNAME.github.io/mama/`
 
 ## 🚀 Deploying to Other Platforms
 
@@ -462,4 +462,4 @@ For issues and questions:
 
 **Made with ❤️ for email power users**
 
-*Manage 30 mailboxes like a pro with AI agents that actually DO things!*
+*MAMA - Manage 30 mailboxes like a pro with AI agents that actually DO things!*
