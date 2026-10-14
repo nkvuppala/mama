@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mailbox, ThemeConfig, AGENT_EMOJIS, ACCENT_COLORS, PRIORITY_CONFIG, MailboxPriority } from '../types';
+import AgentBrainConfig from './AgentBrainConfig';
 
 interface AgentConfigProps {
   mailboxes: Mailbox[];
@@ -9,6 +10,7 @@ interface AgentConfigProps {
 
 export default function AgentConfig({ mailboxes, onUpdate, theme }: AgentConfigProps) {
   const [selectedId, setSelectedId] = useState<string | null>(mailboxes[0]?.id || null);
+  const [activeTab, setActiveTab] = useState<'basic' | 'brain'>('basic');
   const isDark = theme.mode === 'dark';
   const cardBg = isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200';
   const selected = mailboxes.find(m => m.id === selectedId);
@@ -70,6 +72,34 @@ export default function AgentConfig({ mailboxes, onUpdate, theme }: AgentConfigP
         {/* Agent Config Panel */}
         {selected && (
           <div className="lg:col-span-2 space-y-4">
+            {/* Tabs */}
+            <div className={`${cardBg} border rounded-xl p-2 flex gap-2`}>
+              <button
+                onClick={() => setActiveTab('basic')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'basic'
+                    ? 'text-white'
+                    : isDark ? 'text-gray-400 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                style={activeTab === 'basic' ? { background: theme.accentColor } : {}}
+              >
+                🪪 Basic Config
+              </button>
+              <button
+                onClick={() => setActiveTab('brain')}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'brain'
+                    ? 'text-white'
+                    : isDark ? 'text-gray-400 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                style={activeTab === 'brain' ? { background: theme.accentColor } : {}}
+              >
+                🧠 AI Brain & LLM
+              </button>
+            </div>
+
+            {activeTab === 'basic' && (
+            <>
             {/* Identity */}
             <div className={`${cardBg} border rounded-xl p-5`}>
               <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -437,6 +467,16 @@ export default function AgentConfig({ mailboxes, onUpdate, theme }: AgentConfigP
                 </div>
               </div>
             </div>
+            </>
+            )}
+
+            {activeTab === 'brain' && (
+              <AgentBrainConfig
+                mailbox={selected}
+                onUpdate={(updates) => onUpdate(selected.id, updates)}
+                theme={theme}
+              />
+            )}
           </div>
         )}
       </div>

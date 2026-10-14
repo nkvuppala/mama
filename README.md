@@ -6,6 +6,15 @@ A powerful web application for managing multiple email accounts with AI-powered 
 
 ## ✨ Features
 
+### 🧠 AI-Powered Agents (NEW!)
+- **Real LLM Integration**: OpenAI (GPT-4), Google Gemini, Anthropic Claude
+- **Agent Brain**: Company knowledge base, FAQs, products/services
+- **Rule Engine**: Automated responses based on conditions
+- **Learning System**: Agents improve from your corrections
+- **Personality & Tone**: Professional, friendly, casual, formal
+- **Confidence Threshold**: Control when agents act autonomously
+- **Multi-Language Support**: Agents respond in your preferred language
+
 ### 📮 Multi-Mailbox Management (Up to 30)
 - **Multiple Providers**: Gmail, Outlook, IMAP, Yahoo, iCloud, Custom
 - **Company Grouping**: Organize mailboxes by company/organization

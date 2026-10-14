@@ -1,4 +1,25 @@
-import { Mailbox, Email } from './types';
+import { Mailbox, Email, AgentBrain, LLMConfig } from './types';
+
+const defaultBrain: AgentBrain = {
+  companyInfo: '',
+  products: [],
+  faqs: [],
+  pastEmails: [],
+  tone: 'professional',
+  responseStyle: 'balanced',
+  language: 'English',
+  rules: [],
+  learnFromReplies: true,
+  confidenceThreshold: 0.7,
+};
+
+const defaultLLM: LLMConfig = {
+  provider: 'openai',
+  apiKey: '',
+  model: 'gpt-4',
+  maxTokens: 2000,
+  temperature: 0.7,
+};
 
 const defaultOOO = {
   enabled: false,
@@ -46,6 +67,8 @@ export const sampleMailboxes: Mailbox[] = [
     },
     replyPrefix: 'On {date}, {from} wrote:',
     outOfOffice: { ...defaultOOO },
+    brain: { ...defaultBrain },
+    llmConfig: { ...defaultLLM },
   },
   {
     id: 'mb2',
@@ -78,6 +101,8 @@ export const sampleMailboxes: Mailbox[] = [
     },
     replyPrefix: 'On {date}, {from} wrote:',
     outOfOffice: { ...defaultOOO },
+    brain: { ...defaultBrain },
+    llmConfig: { ...defaultLLM },
   },
   {
     id: 'mb3',

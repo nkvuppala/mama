@@ -80,6 +80,9 @@ export interface Mailbox {
   outOfOffice: OutOfOfficeConfig;
   // Company grouping
   company: string;
+  // AI Brain Configuration
+  brain?: AgentBrain;
+  llmConfig?: LLMConfig;
 }
 
 export interface Email {
@@ -155,6 +158,44 @@ export interface ThemeConfig {
   mode: ThemeMode;
   accentColor: string;
   accentName: string;
+}
+
+export interface LLMConfig {
+  provider: 'openai' | 'gemini' | 'claude' | 'custom';
+  apiKey: string;
+  model: string;
+  maxTokens: number;
+  temperature: number;
+}
+
+export interface AgentBrain {
+  // Knowledge Base
+  companyInfo: string;
+  products: string[];
+  faqs: Array<{ question: string; answer: string }>;
+  pastEmails: Array<{ subject: string; response: string }>;
+  
+  // Personality & Tone
+  tone: 'professional' | 'friendly' | 'casual' | 'formal';
+  responseStyle: 'concise' | 'detailed' | 'balanced';
+  language: string;
+  
+  // Rules Engine
+  rules: AgentRule[];
+  
+  // Learning
+  learnFromReplies: boolean;
+  confidenceThreshold: number; // 0-1, when to ask for human approval
+}
+
+export interface AgentRule {
+  id: string;
+  name: string;
+  condition: string; // e.g., "contains('urgent')" or "from.includes('boss@')"
+  action: 'reply' | 'escalate' | 'ignore' | 'categorize' | 'forward';
+  response?: string; // Template response
+  priority: number; // Rule priority (higher = checked first)
+  enabled: boolean;
 }
 
 export const PRIORITY_CONFIG: Record<MailboxPriority, { label: string; icon: string; color: string; desc: string }> = {

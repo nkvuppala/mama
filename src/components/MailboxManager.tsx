@@ -356,6 +356,25 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
         replyFrequency: 'once',
       },
       company: company || 'Personal',
+      brain: {
+        companyInfo: '',
+        products: [],
+        faqs: [],
+        pastEmails: [],
+        tone: 'professional',
+        responseStyle: 'balanced',
+        language: 'English',
+        rules: [],
+        learnFromReplies: true,
+        confidenceThreshold: 0.7,
+      },
+      llmConfig: {
+        provider: 'openai',
+        apiKey: '',
+        model: 'gpt-4',
+        maxTokens: 2000,
+        temperature: 0.7,
+      },
     });
   };
 
