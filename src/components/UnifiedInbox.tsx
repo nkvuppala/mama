@@ -8,10 +8,11 @@ interface UnifiedInboxProps {
   selectedMailboxId: string | null;
   onSelectMailbox: (id: string | null) => void;
   onAction: (action: AgentAction) => void;
+  onRenameCompany: (oldName: string, newName: string) => void;
   theme: ThemeConfig;
 }
 
-export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onSelectMailbox, onAction, theme }: UnifiedInboxProps) {
+export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onSelectMailbox, onAction, onRenameCompany, theme }: UnifiedInboxProps) {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [replyText, setReplyText] = useState('');
   const [showReply, setShowReply] = useState(false);
@@ -94,9 +95,21 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
               return acc;
             }, {})
           ).map(([companyName, companyMailboxes]) => (
-            <div key={companyName} className="mb-3">
-              <div className={`text-xs font-medium uppercase tracking-wide mb-1 px-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                {companyName}
+            <div key={companyName} className="mb-3 group">
+              <div className={`flex items-center gap-1 mb-1 px-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                <span className="text-xs font-medium uppercase tracking-wide flex-1">{companyName}</span>
+                <button
+                  onClick={() => {
+                    const newName = prompt('Rename company:', companyName);
+                    if (newName && newName.trim() && newName.trim() !== companyName) {
+                      onRenameCompany(companyName, newName.trim());
+                    }
+                  }}
+                  className={`opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-xs ${isDark ? 'hover:bg-gray-700 hover:text-white' : 'hover:bg-gray-200 hover:text-gray-900'}`}
+                  title="Rename company"
+                >
+                  ✏️
+                </button>
               </div>
               {companyMailboxes.map(mb => {
                 const count = emails.filter(e => e.mailboxId === mb.id).length;

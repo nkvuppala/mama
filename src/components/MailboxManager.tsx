@@ -7,10 +7,11 @@ interface MailboxManagerProps {
   onRemove: (id: string) => void;
   onUpdate: (id: string, updates: Partial<Mailbox>) => void;
   onRefresh: (id: string) => void;
+  onRenameCompany: (oldName: string, newName: string) => void;
   theme: ThemeConfig;
 }
 
-export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, onRefresh, theme }: MailboxManagerProps) {
+export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, onRefresh, onRenameCompany, theme }: MailboxManagerProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const isDark = theme.mode === 'dark';
@@ -77,24 +78,15 @@ export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, o
             return acc;
           }, {})
         ).map(([companyName, companyMailboxes]) => (
-          <div key={companyName}>
-            <div className={`flex items-center gap-3 mb-3 px-2`}>
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
-                {companyName[0]}
-              </div>
-              <div className="flex-1">
-                <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{companyName}</h3>
-                <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                  {companyMailboxes.length} mailbox{companyMailboxes.length !== 1 ? 'es' : ''} • {companyMailboxes.reduce((s, m) => s + m.unreadCount, 0)} unread
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                {companyMailboxes.some(m => m.outOfOffice.enabled) && (
-                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">🏖️ OOO Active</span>
-                )}
-              </div>
-            </div>
-            <div className="space-y-2">
+            <div key={companyName} className="group">
+              <CompanyGroupHeader 
+                name={companyName} 
+                count={companyMailboxes.length}
+                unread={companyMailboxes.reduce((s, m) => s + m.unreadCount, 0)}
+                hasOOO={companyMailboxes.some(m => m.outOfOffice.enabled)}
+                onRename={(newName: string) => onRenameCompany(companyName, newName)}
+                theme={theme}
+              />            <div className="space-y-2">
               {companyMailboxes.map(mb => (
                 <div key={mb.id} className={`${cardBg} border rounded-xl overflow-hidden`} style={{ borderLeft: `3px solid ${mb.agentColor}` }}>
             <div className="p-4">
@@ -476,5 +468,74 @@ function Toggle({ label, checked, onChange, theme }: { label: string; checked: b
       </div>
       <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{label}</span>
     </label>
+  );
+}
+
+function CompanyGroupHeader({ name, count, unread, hasOOO, onRename, theme }: {
+  name: string;
+  count: number;
+  unread: number;
+  hasOOO: boolean;
+  onRename: (newName: string) => void;
+  theme: ThemeConfig;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(name);
+  const isDark = theme.mode === 'dark';
+
+  const handleSave = () => {
+    if (editValue.trim() && editValue !== name) {
+      onRename(editValue.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditValue(name);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="flex items-center gap-3 mb-3 px-2">
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+        {name[0]}
+      </div>
+      <div className="flex-1">
+        {isEditing ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSave();
+                if (e.key === 'Escape') handleCancel();
+              }}
+              className={`px-2 py-1 text-sm rounded border ${isDark ? 'bg-gray-800 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2`}
+              autoFocus
+            />
+            <button onClick={handleSave} className="text-green-500 hover:text-green-400 text-sm" title="Save">✓</button>
+            <button onClick={handleCancel} className="text-red-500 hover:text-red-400 text-sm" title="Cancel">✗</button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{name}</h3>
+            <button
+              onClick={() => { setEditValue(name); setIsEditing(true); }}
+              className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-gray-700/20 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+              title="Rename company"
+            >
+              ✏️
+            </button>
+          </div>
+        )}
+        <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+          {count} mailbox{count !== 1 ? 'es' : ''} • {unread} unread
+        </p>
+      </div>
+      {hasOOO && (
+        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">🏖️ OOO Active</span>
+      )}
+    </div>
   );
 }

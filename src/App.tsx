@@ -61,6 +61,13 @@ export default function App() {
     setMailboxes(prev => prev.filter(m => m.id !== id));
   };
 
+  const renameCompany = (oldName: string, newName: string) => {
+    if (!newName.trim() || newName === oldName) return;
+    setMailboxes(prev => prev.map(m => 
+      m.company === oldName ? { ...m, company: newName.trim() } : m
+    ));
+  };
+
   return (
     <div className={`flex h-screen overflow-hidden ${theme.mode === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-950 text-gray-100'}`}>
       <Sidebar 
@@ -83,6 +90,7 @@ export default function App() {
             totalActions={totalActions}
             onRefreshMailbox={refreshMailbox}
             onSelectMailbox={(id: string) => { setSelectedMailboxId(id); setCurrentView('inbox'); }}
+            onRenameCompany={renameCompany}
             theme={theme}
           />
         )}
@@ -93,6 +101,7 @@ export default function App() {
             onRemove={removeMailbox}
             onUpdate={updateMailbox}
             onRefresh={refreshMailbox}
+            onRenameCompany={renameCompany}
             theme={theme}
           />
         )}
@@ -110,6 +119,7 @@ export default function App() {
             selectedMailboxId={selectedMailboxId}
             onSelectMailbox={setSelectedMailboxId}
             onAction={logAction}
+            onRenameCompany={renameCompany}
             theme={theme}
           />
         )}
