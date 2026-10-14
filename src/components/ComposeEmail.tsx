@@ -203,6 +203,22 @@ export default function ComposeEmail({ mailboxes, replyTo, onClose, onSend, them
             />
           </div>
 
+          {/* Out of Office Warning */}
+          {fromMailbox?.outOfOffice.enabled && (
+            <div className={`rounded-lg p-3 border ${isDark ? 'bg-yellow-500/10 border-yellow-500/30' : 'bg-yellow-50 border-yellow-200'}`}>
+              <div className="flex items-center gap-2 mb-1">
+                <span>🏖️</span>
+                <span className={`text-sm font-medium ${isDark ? 'text-yellow-400' : 'text-yellow-700'}`}>
+                  Out of Office Active
+                </span>
+              </div>
+              <p className={`text-xs ${isDark ? 'text-yellow-400/70' : 'text-yellow-600'}`}>
+                Auto-reply is enabled ({fromMailbox.outOfOffice.startDate} → {fromMailbox.outOfOffice.endDate}). 
+                Senders will receive: "{fromMailbox.outOfOffice.subject}"
+              </p>
+            </div>
+          )}
+
           {/* Signature Preview */}
           {fromMailbox && (
             <div className={`rounded-lg p-3 border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>

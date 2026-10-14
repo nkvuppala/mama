@@ -13,6 +13,17 @@ export interface EmailSignature {
   customHtml?: string;
 }
 
+export interface OutOfOfficeConfig {
+  enabled: boolean;
+  startDate: string;
+  endDate: string;
+  subject: string;
+  message: string;
+  onlyExternal: boolean; // Only reply to external senders
+  allowedDomains: string[]; // Don't reply to these domains (e.g., internal)
+  replyFrequency: 'once' | 'daily' | 'every'; // How often to reply to same sender
+}
+
 export interface ImapConfig {
   host: string;
   port: number;
@@ -65,6 +76,10 @@ export interface Mailbox {
   replyPrefix: string; // e.g., "On {date}, {from} wrote:"
   defaultCc?: string;
   defaultBcc?: string;
+  // Out of Office
+  outOfOffice: OutOfOfficeConfig;
+  // Company grouping
+  company: string;
 }
 
 export interface Email {

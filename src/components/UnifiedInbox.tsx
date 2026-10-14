@@ -69,12 +69,12 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
         />
       )}
 
-      {/* Mailbox Filter Sidebar */}
-      <div className={`w-56 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800 bg-gray-900/50' : 'border-gray-200 bg-gray-50'}`}>
+      {/* Mailbox Filter Sidebar - Grouped by Company */}
+      <div className={`w-60 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800 bg-gray-900/50' : 'border-gray-200 bg-gray-50'}`}>
         <div className="p-3">
           <button
             onClick={() => onSelectMailbox(null)}
-            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium mb-1 transition-colors ${
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium mb-2 transition-colors ${
               !selectedMailboxId
                 ? 'text-white'
                 : isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-200'
@@ -86,29 +86,40 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
             <span className="text-xs opacity-70">{emails.length}</span>
           </button>
 
-          <div className={`text-xs font-medium uppercase tracking-wide mt-4 mb-2 px-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-            Agents
-          </div>
-
-          {mailboxes.map(mb => {
-            const count = emails.filter(e => e.mailboxId === mb.id).length;
-            return (
-              <button
-                key={mb.id}
-                onClick={() => onSelectMailbox(mb.id)}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  selectedMailboxId === mb.id
-                    ? 'text-white'
-                    : isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-200'
-                }`}
-                style={selectedMailboxId === mb.id ? { background: mb.agentColor } : {}}
-              >
-                <span>{mb.agentEmoji}</span>
-                <span className="flex-1 text-left truncate">{mb.agentName}</span>
-                <span className="text-xs opacity-70">{count}</span>
-              </button>
-            );
-          })}
+          {/* Grouped by Company */}
+          {Object.entries(
+            mailboxes.reduce((acc: Record<string, typeof mailboxes>, mb) => {
+              if (!acc[mb.company]) acc[mb.company] = [];
+              acc[mb.company].push(mb);
+              return acc;
+            }, {})
+          ).map(([companyName, companyMailboxes]) => (
+            <div key={companyName} className="mb-3">
+              <div className={`text-xs font-medium uppercase tracking-wide mb-1 px-3 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                {companyName}
+              </div>
+              {companyMailboxes.map(mb => {
+                const count = emails.filter(e => e.mailboxId === mb.id).length;
+                return (
+                  <button
+                    key={mb.id}
+                    onClick={() => onSelectMailbox(mb.id)}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                      selectedMailboxId === mb.id
+                        ? 'text-white'
+                        : isDark ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-200'
+                    }`}
+                    style={selectedMailboxId === mb.id ? { background: mb.agentColor } : {}}
+                  >
+                    <span className="text-sm">{mb.agentEmoji}</span>
+                    <span className="flex-1 text-left truncate text-xs">{mb.agentName}</span>
+                    {mb.outOfOffice.enabled && <span className="text-xs" title="Out of Office">🏖️</span>}
+                    <span className="text-xs opacity-70">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
 

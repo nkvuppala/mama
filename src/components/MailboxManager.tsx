@@ -68,10 +68,35 @@ export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, o
         />
       )}
 
-      {/* Mailbox List */}
-      <div className="space-y-3">
-        {mailboxes.map(mb => (
-          <div key={mb.id} className={`${cardBg} border rounded-xl overflow-hidden`} style={{ borderLeft: `3px solid ${mb.agentColor}` }}>
+      {/* Mailbox List - Grouped by Company */}
+      <div className="space-y-6">
+        {Object.entries(
+          mailboxes.reduce((acc: Record<string, Mailbox[]>, mb) => {
+            if (!acc[mb.company]) acc[mb.company] = [];
+            acc[mb.company].push(mb);
+            return acc;
+          }, {})
+        ).map(([companyName, companyMailboxes]) => (
+          <div key={companyName}>
+            <div className={`flex items-center gap-3 mb-3 px-2`}>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+                {companyName[0]}
+              </div>
+              <div className="flex-1">
+                <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{companyName}</h3>
+                <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                  {companyMailboxes.length} mailbox{companyMailboxes.length !== 1 ? 'es' : ''} • {companyMailboxes.reduce((s, m) => s + m.unreadCount, 0)} unread
+                </p>
+              </div>
+              <div className="flex items-center gap-1">
+                {companyMailboxes.some(m => m.outOfOffice.enabled) && (
+                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">🏖️ OOO Active</span>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              {companyMailboxes.map(mb => (
+                <div key={mb.id} className={`${cardBg} border rounded-xl overflow-hidden`} style={{ borderLeft: `3px solid ${mb.agentColor}` }}>
             <div className="p-4">
               <div className="flex items-center gap-4">
                 <div 
@@ -220,6 +245,9 @@ export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, o
                 </div>
               </div>
             )}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -241,6 +269,7 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
   const [agentEmoji, setAgentEmoji] = useState(AGENT_EMOJIS[Math.floor(Math.random() * AGENT_EMOJIS.length)]);
   const [imapHost, setImapHost] = useState('');
   const [imapPort, setImapPort] = useState(993);
+  const [company, setCompany] = useState('');
 
   const handleSubmit = () => {
     if (!name || !email || !agentName) return;
@@ -285,6 +314,17 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
       priority: 'normal',
       signature: { name: agentName },
       replyPrefix: 'On {date}, {from} wrote:',
+      outOfOffice: {
+        enabled: false,
+        startDate: '',
+        endDate: '',
+        subject: 'Out of Office',
+        message: 'Thank you for your email. I am currently out of the office and will respond upon my return.',
+        onlyExternal: false,
+        allowedDomains: [],
+        replyFrequency: 'once',
+      },
+      company: company || 'Personal',
     });
   };
 
@@ -336,6 +376,16 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
             value={agentName}
             onChange={(e) => setAgentName(e.target.value)}
             placeholder="e.g., Rita, Theta, Max"
+            className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+          />
+        </div>
+        <div>
+          <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Company / Group</label>
+          <input
+            type="text"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="e.g., TechCorp Inc., Personal"
             className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
           />
         </div>

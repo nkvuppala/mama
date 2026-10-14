@@ -47,11 +47,11 @@ export default function Dashboard({ mailboxes, emails, actionLog, totalUnread, a
         <StatCard icon="⚡" label="Actions Today" value={totalActions.toString()} sub="auto-performed" theme={theme} />
       </div>
 
-      {/* All Mailboxes Grid */}
+      {/* All Mailboxes Grid - Grouped by Company */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            📮 Your Mailboxes
+            📮 Your Mailboxes ({mailboxes.length})
           </h2>
           <button 
             className="text-sm px-4 py-2 rounded-lg text-white font-medium transition-colors hover:opacity-90"
@@ -61,8 +61,32 @@ export default function Dashboard({ mailboxes, emails, actionLog, totalUnread, a
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {mailboxes.map(mb => (
+        {/* Company Groups */}
+        <div className="space-y-6">
+          {Object.entries(
+            mailboxes.reduce((acc: Record<string, typeof mailboxes>, mb) => {
+              if (!acc[mb.company]) acc[mb.company] = [];
+              acc[mb.company].push(mb);
+              return acc;
+            }, {})
+          ).map(([companyName, companyMailboxes]) => (
+            <div key={companyName}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+                  {companyName[0]}
+                </div>
+                <div className="flex-1">
+                  <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{companyName}</h3>
+                  <p className={`text-xs ${subtext}`}>
+                    {companyMailboxes.length} mailbox{companyMailboxes.length !== 1 ? 'es' : ''} • {companyMailboxes.reduce((s, m) => s + m.unreadCount, 0)} unread
+                  </p>
+                </div>
+                {companyMailboxes.some(m => m.outOfOffice.enabled) && (
+                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">🏖️ OOO Active</span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {companyMailboxes.map(mb => (
             <div
               key={mb.id}
               className={`${cardBg} border rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group`}
@@ -125,6 +149,9 @@ export default function Dashboard({ mailboxes, emails, actionLog, totalUnread, a
               >
                 🔄 Refresh Now
               </button>
+            </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

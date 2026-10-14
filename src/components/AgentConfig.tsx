@@ -251,6 +251,124 @@ export default function AgentConfig({ mailboxes, onUpdate, theme }: AgentConfigP
               </div>
             </div>
 
+            {/* Out of Office */}
+            <div className={`${cardBg} border rounded-xl p-5`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  🏖️ Out of Office Auto-Reply
+                </h3>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <div
+                    onClick={() => onUpdate(selected.id, { 
+                      outOfOffice: { ...selected.outOfOffice, enabled: !selected.outOfOffice.enabled }
+                    })}
+                    className={`w-11 h-6 rounded-full relative transition-colors ${selected.outOfOffice.enabled ? '' : isDark ? 'bg-gray-700' : 'bg-gray-300'}`}
+                    style={selected.outOfOffice.enabled ? { background: selected.agentColor } : {}}
+                  >
+                    <div 
+                      className="w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow"
+                      style={{ left: selected.outOfOffice.enabled ? '22px' : '2px' }}
+                    ></div>
+                  </div>
+                  <span className={`text-sm font-medium ${selected.outOfOffice.enabled ? 'text-green-400' : isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {selected.outOfOffice.enabled ? 'Active' : 'Inactive'}
+                  </span>
+                </label>
+              </div>
+
+              {selected.outOfOffice.enabled && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Start Date</label>
+                      <input
+                        type="date"
+                        value={selected.outOfOffice.startDate}
+                        onChange={(e) => onUpdate(selected.id, { outOfOffice: { ...selected.outOfOffice, startDate: e.target.value } })}
+                        className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                      />
+                    </div>
+                    <div>
+                      <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>End Date</label>
+                      <input
+                        type="date"
+                        value={selected.outOfOffice.endDate}
+                        onChange={(e) => onUpdate(selected.id, { outOfOffice: { ...selected.outOfOffice, endDate: e.target.value } })}
+                        className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Subject</label>
+                    <input
+                      type="text"
+                      value={selected.outOfOffice.subject}
+                      onChange={(e) => onUpdate(selected.id, { outOfOffice: { ...selected.outOfOffice, subject: e.target.value } })}
+                      className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                    />
+                  </div>
+                  <div>
+                    <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Message</label>
+                    <textarea
+                      value={selected.outOfOffice.message}
+                      onChange={(e) => onUpdate(selected.id, { outOfOffice: { ...selected.outOfOffice, message: e.target.value } })}
+                      className={`w-full rounded-lg px-3 py-2 text-sm border resize-none h-24 ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Reply Frequency</label>
+                      <select
+                        value={selected.outOfOffice.replyFrequency}
+                        onChange={(e) => onUpdate(selected.id, { outOfOffice: { ...selected.outOfOffice, replyFrequency: e.target.value as any } })}
+                        className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                      >
+                        <option value="once">Once per sender</option>
+                        <option value="daily">Once per day</option>
+                        <option value="every">Every email</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-3 pt-5">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <div
+                          onClick={() => onUpdate(selected.id, { outOfOffice: { ...selected.outOfOffice, onlyExternal: !selected.outOfOffice.onlyExternal } })}
+                          className={`w-9 h-5 rounded-full relative transition-colors ${selected.outOfOffice.onlyExternal ? '' : isDark ? 'bg-gray-700' : 'bg-gray-300'}`}
+                          style={selected.outOfOffice.onlyExternal ? { background: selected.agentColor } : {}}
+                        >
+                          <div 
+                            className="w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all"
+                            style={{ left: selected.outOfOffice.onlyExternal ? '18px' : '2px' }}
+                          ></div>
+                        </div>
+                        <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>External only</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>
+                      Don't reply to these domains (comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={selected.outOfOffice.allowedDomains.join(', ')}
+                      onChange={(e) => onUpdate(selected.id, { outOfOffice: { ...selected.outOfOffice, allowedDomains: e.target.value.split(',').map(s => s.trim()).filter(Boolean) } })}
+                      placeholder="e.g., company.com, team.org"
+                      className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'} focus:outline-none`}
+                    />
+                  </div>
+
+                  {/* Preview */}
+                  <div className={`p-3 rounded-lg border ${isDark ? 'bg-yellow-500/5 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
+                    <p className={`text-xs font-medium mb-2 ${isDark ? 'text-yellow-400' : 'text-yellow-700'}`}>📧 Auto-reply preview:</p>
+                    <div className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <p className="font-medium mb-1">Subject: {selected.outOfOffice.subject}</p>
+                      <p className="whitespace-pre-line">{selected.outOfOffice.message}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Schedule & Behavior */}
             <div className={`${cardBg} border rounded-xl p-5`}>
               <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
