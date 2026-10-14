@@ -28,3 +28,11 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
 }
+
+export interface AgentAction {
+  type: 'reply' | 'schedule' | 'task' | 'escalate' | 'forward' | 'organize' | 'scan' | 'summarize';
+  description: string;
+  result: string;
+  status: 'completed' | 'pending_approval' | 'failed';
+  timestamp?: string;
+}

@@ -9,7 +9,8 @@ export default function Sidebar({ currentView, setCurrentView, unreadCount, urge
   const navItems = [
     { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
     { id: 'emails', icon: '📧', label: 'Emails', badge: unreadCount },
-    { id: 'agent', icon: '🤖', label: 'Agent Activity', badge: urgentCount },
+    { id: 'actions', icon: '⚡', label: 'Agent Actions' },
+    { id: 'agent', icon: '🤖', label: 'Agent Config', badge: urgentCount },
     { id: 'chat', icon: '💬', label: 'Chat with Agent' },
     { id: 'setup', icon: '📖', label: 'Setup Guide' },
   ];
