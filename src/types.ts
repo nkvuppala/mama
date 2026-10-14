@@ -2,22 +2,47 @@ export type MailboxType = 'gmail' | 'outlook' | 'imap' | 'yahoo' | 'icloud' | 'c
 export type RefreshSchedule = 'realtime' | '5min' | '15min' | '30min' | '1hour' | 'manual';
 export type AgentStatus = 'active' | 'paused' | 'error' | 'syncing';
 export type ThemeMode = 'light' | 'dark';
+export type MailboxPriority = 'critical' | 'high' | 'normal' | 'low';
+
+export interface EmailSignature {
+  name: string;
+  title?: string;
+  company?: string;
+  phone?: string;
+  website?: string;
+  customHtml?: string;
+}
+
+export interface ImapConfig {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  ssl: boolean;
+  // Folders to monitor
+  folders: string[];
+  // SMTP for sending
+  smtpHost: string;
+  smtpPort: number;
+  smtpUsername: string;
+  smtpPassword: string;
+  smtpSsl: boolean;
+}
 
 export interface Mailbox {
   id: string;
   name: string;
   emailAddress: string;
   type: MailboxType;
-  // IMAP settings (for imap/custom)
-  imapHost?: string;
-  imapPort?: number;
-  smtpHost?: string;
-  smtpPort?: number;
+  // IMAP settings
+  imapConfig?: ImapConfig;
   // Agent config
   agentName: string;
   agentEmoji: string;
   agentColor: string;
   agentPersonality: string;
+  // Priority
+  priority: MailboxPriority;
   // Schedule
   refreshSchedule: RefreshSchedule;
   lastChecked: string;
@@ -34,6 +59,12 @@ export interface Mailbox {
   escalateUrgent: boolean;
   notifySlack: boolean;
   notifyPush: boolean;
+  // Signature
+  signature: EmailSignature;
+  // Reply settings
+  replyPrefix: string; // e.g., "On {date}, {from} wrote:"
+  defaultCc?: string;
+  defaultBcc?: string;
 }
 
 export interface Email {
@@ -41,6 +72,7 @@ export interface Email {
   mailboxId: string;
   from: string;
   fromEmail: string;
+  to?: string;
   subject: string;
   preview: string;
   body: string;
@@ -71,17 +103,22 @@ export interface ChatMessage {
 }
 
 export interface AgentAction {
-  type: 'reply' | 'schedule' | 'task' | 'escalate' | 'forward' | 'organize' | 'scan' | 'summarize';
+  type: 'reply' | 'schedule' | 'task' | 'escalate' | 'forward' | 'organize' | 'scan' | 'summarize' | 'send';
   mailboxId: string;
   description: string;
   result: string;
-  status: 'completed' | 'pending_approval' | 'failed';
+  status: 'completed' | 'pending_approval' | 'failed' | 'sending';
 }
 
-export interface ThemeConfig {
-  mode: ThemeMode;
-  accentColor: string;
-  accentName: string;
+export interface ComposedEmail {
+  to: string;
+  cc?: string;
+  bcc?: string;
+  subject: string;
+  body: string;
+  fromMailboxId: string;
+  isReply?: boolean;
+  replyToEmailId?: string;
 }
 
 export const AGENT_EMOJIS = ['🤖', '🦊', '🐱', '🦉', '🐶', '🦄', '🐼', '🦁', '🐸', '🦋', '🐧', '🦅', '🐬', '🦜', '🐝', '🦈', '🐙', '🦎', '🐺', '🦇'];
@@ -98,3 +135,16 @@ export const ACCENT_COLORS = [
   { name: 'Cyan', value: '#06b6d4' },
   { name: 'Indigo', value: '#6366f1' },
 ];
+
+export interface ThemeConfig {
+  mode: ThemeMode;
+  accentColor: string;
+  accentName: string;
+}
+
+export const PRIORITY_CONFIG: Record<MailboxPriority, { label: string; icon: string; color: string; desc: string }> = {
+  critical: { label: 'Critical', icon: '🔴', color: '#ef4444', desc: 'Instant alerts, real-time sync, always on top' },
+  high: { label: 'High', icon: '🟠', color: '#f97316', desc: 'Frequent checks, push notifications' },
+  normal: { label: 'Normal', icon: '🟢', color: '#22c55e', desc: 'Standard monitoring, balanced' },
+  low: { label: 'Low', icon: '⚪', color: '#6b7280', desc: 'Hourly checks, minimal notifications' },
+};

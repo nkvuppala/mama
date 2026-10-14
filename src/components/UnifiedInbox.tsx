@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Mailbox, Email, AgentAction, ThemeConfig } from '../types';
+import { Mailbox, Email, AgentAction, ThemeConfig, ComposedEmail } from '../types';
+import ComposeEmail from './ComposeEmail';
 
 interface UnifiedInboxProps {
   mailboxes: Mailbox[];
@@ -14,6 +15,8 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [replyText, setReplyText] = useState('');
   const [showReply, setShowReply] = useState(false);
+  const [showCompose, setShowCompose] = useState(false);
+  const [composeReplyTo, setComposeReplyTo] = useState<Email | null>(null);
   const isDark = theme.mode === 'dark';
   const cardBg = isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200';
 
@@ -37,8 +40,35 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
     setShowReply(false);
   };
 
+  const handleComposeSend = (composed: ComposedEmail) => {
+    const mb = mailboxes.find(m => m.id === composed.fromMailboxId);
+    onAction({
+      type: 'send',
+      mailboxId: composed.fromMailboxId,
+      description: `${mb?.agentName || 'Agent'} sent email to ${composed.to}`,
+      result: `Subject: ${composed.subject}`,
+      status: 'completed'
+    });
+  };
+
+  const handleReplyClick = () => {
+    setComposeReplyTo(selectedEmail);
+    setShowCompose(true);
+  };
+
   return (
     <div className="flex-1 flex overflow-hidden">
+      {/* Compose Modal */}
+      {showCompose && (
+        <ComposeEmail
+          mailboxes={mailboxes}
+          replyTo={composeReplyTo}
+          onClose={() => { setShowCompose(false); setComposeReplyTo(null); }}
+          onSend={handleComposeSend}
+          theme={theme}
+        />
+      )}
+
       {/* Mailbox Filter Sidebar */}
       <div className={`w-56 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800 bg-gray-900/50' : 'border-gray-200 bg-gray-50'}`}>
         <div className="p-3">
@@ -85,12 +115,21 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
       {/* Email List */}
       <div className={`w-96 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
         <div className={`p-3 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
-          <h2 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {selectedMailboxId 
-              ? `${getMailbox(selectedMailboxId)?.agentName}'s Inbox` 
-              : 'Unified Inbox'
-            }
-          </h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              {selectedMailboxId 
+                ? `${getMailbox(selectedMailboxId)?.agentName}'s Inbox` 
+                : 'Unified Inbox'
+              }
+            </h2>
+            <button
+              onClick={() => { setComposeReplyTo(null); setShowCompose(true); }}
+              className="text-white px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90"
+              style={{ background: theme.accentColor }}
+            >
+              ✉️ Compose
+            </button>
+          </div>
           <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
             {filteredEmails.length} emails
           </p>
@@ -198,7 +237,7 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
             <div className={`${cardBg} border rounded-xl p-4 mb-6`}>
               <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>⚡ Quick Actions</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                <QuickAction icon="✉️" label="Reply" onClick={() => setShowReply(!showReply)} theme={theme} />
+                <QuickAction icon="✉️" label="Reply" onClick={handleReplyClick} theme={theme} />
                 <QuickAction icon="🔄" label="Forward" onClick={() => onAction({ type: 'forward', mailboxId: selectedEmail.mailboxId, description: `Forwarded: ${selectedEmail.subject}`, result: 'Forwarded to team', status: 'completed' })} theme={theme} />
                 <QuickAction icon="📅" label="Schedule" onClick={() => onAction({ type: 'schedule', mailboxId: selectedEmail.mailboxId, description: `Meeting scheduled re: ${selectedEmail.subject}`, result: 'Calendar invite sent', status: 'completed' })} theme={theme} />
                 <QuickAction icon="✅" label="Create Task" onClick={() => onAction({ type: 'task', mailboxId: selectedEmail.mailboxId, description: `Task from: ${selectedEmail.subject}`, result: 'Added to task board', status: 'completed' })} theme={theme} />

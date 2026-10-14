@@ -1,4 +1,4 @@
-import { Mailbox, Email, AgentAction, ThemeConfig } from '../types';
+import { Mailbox, Email, AgentAction, ThemeConfig, PRIORITY_CONFIG } from '../types';
 
 interface DashboardProps {
   mailboxes: Mailbox[];
@@ -104,9 +104,12 @@ export default function Dashboard({ mailboxes, emails, actionLog, totalUnread, a
 
               {/* Footer */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <span className="text-sm">{typeIcons[mb.type]}</span>
                   <span className={`text-xs capitalize ${subtext}`}>{mb.type}</span>
+                  <span className="text-xs" title={PRIORITY_CONFIG[mb.priority].desc}>
+                    {PRIORITY_CONFIG[mb.priority].icon}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <span className={`text-xs ${subtext}`}>🔄 {scheduleLabels[mb.refreshSchedule]}</span>

@@ -122,6 +122,49 @@ export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, o
             {/* Expanded Edit */}
             {editingId === mb.id && (
               <div className={`border-t p-4 ${isDark ? 'border-gray-800 bg-gray-900/50' : 'border-gray-200 bg-gray-50'}`}>
+                {/* IMAP Config Display */}
+                {mb.type === 'imap' && mb.imapConfig && (
+                  <div className={`mb-4 p-3 rounded-lg border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'}`}>
+                    <p className={`text-xs font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>🖥️ IMAP Configuration</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>Host:</span>
+                        <span className={`ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{mb.imapConfig.host}</span>
+                      </div>
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>Port:</span>
+                        <span className={`ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{mb.imapConfig.port}</span>
+                      </div>
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>SSL:</span>
+                        <span className={`ml-1 ${mb.imapConfig.ssl ? 'text-green-400' : 'text-red-400'}`}>{mb.imapConfig.ssl ? '✓ Yes' : '✗ No'}</span>
+                      </div>
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>Folders:</span>
+                        <span className={`ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{mb.imapConfig.folders.join(', ')}</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-2">
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>SMTP Host:</span>
+                        <span className={`ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{mb.imapConfig.smtpHost}</span>
+                      </div>
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>SMTP Port:</span>
+                        <span className={`ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{mb.imapConfig.smtpPort}</span>
+                      </div>
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>Username:</span>
+                        <span className={`ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{mb.imapConfig.username}</span>
+                      </div>
+                      <div>
+                        <span className={isDark ? 'text-gray-500' : 'text-gray-500'}>Password:</span>
+                        <span className={`ml-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>••••••••</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Mailbox Name</label>
@@ -224,7 +267,24 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
       escalateUrgent: false,
       notifySlack: false,
       notifyPush: true,
-      ...(type === 'imap' || type === 'custom' ? { imapHost, imapPort } : {}),
+      ...(type === 'imap' || type === 'custom' ? {
+        imapConfig: {
+          host: imapHost,
+          port: imapPort,
+          username: email,
+          password: '',
+          ssl: true,
+          folders: ['INBOX'],
+          smtpHost: '',
+          smtpPort: 587,
+          smtpUsername: email,
+          smtpPassword: '',
+          smtpSsl: true,
+        }
+      } : {}),
+      priority: 'normal',
+      signature: { name: agentName },
+      replyPrefix: 'On {date}, {from} wrote:',
     });
   };
 

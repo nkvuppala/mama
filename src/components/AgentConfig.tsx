@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mailbox, ThemeConfig, AGENT_EMOJIS, ACCENT_COLORS } from '../types';
+import { Mailbox, ThemeConfig, AGENT_EMOJIS, ACCENT_COLORS, PRIORITY_CONFIG, MailboxPriority } from '../types';
 
 interface AgentConfigProps {
   mailboxes: Mailbox[];
@@ -141,6 +141,113 @@ export default function AgentConfig({ mailboxes, onUpdate, theme }: AgentConfigP
                     <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>{p.desc}</p>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Priority */}
+            <div className={`${cardBg} border rounded-xl p-5`}>
+              <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                🎯 Priority Level
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {(Object.keys(PRIORITY_CONFIG) as MailboxPriority[]).map(priority => {
+                  const config = PRIORITY_CONFIG[priority];
+                  return (
+                    <button
+                      key={priority}
+                      onClick={() => onUpdate(selected.id, { priority })}
+                      className={`p-4 rounded-lg border text-left transition-all ${
+                        selected.priority === priority
+                          ? 'border-2'
+                          : isDark ? 'border-gray-700 hover:border-gray-600' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      style={selected.priority === priority ? { borderColor: config.color, background: `${config.color}10` } : {}}
+                    >
+                      <div className="text-2xl mb-2">{config.icon}</div>
+                      <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{config.label}</p>
+                      <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'} mt-1`}>{config.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Signature */}
+            <div className={`${cardBg} border rounded-xl p-5`}>
+              <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                ✍️ Email Signature
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Name</label>
+                  <input
+                    type="text"
+                    value={selected.signature.name}
+                    onChange={(e) => onUpdate(selected.id, { signature: { ...selected.signature, name: e.target.value } })}
+                    className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                  />
+                </div>
+                <div>
+                  <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Title</label>
+                  <input
+                    type="text"
+                    value={selected.signature.title || ''}
+                    onChange={(e) => onUpdate(selected.id, { signature: { ...selected.signature, title: e.target.value } })}
+                    placeholder="e.g., Senior Developer"
+                    className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'} focus:outline-none`}
+                  />
+                </div>
+                <div>
+                  <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Company</label>
+                  <input
+                    type="text"
+                    value={selected.signature.company || ''}
+                    onChange={(e) => onUpdate(selected.id, { signature: { ...selected.signature, company: e.target.value } })}
+                    placeholder="e.g., TechCorp Inc."
+                    className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'} focus:outline-none`}
+                  />
+                </div>
+                <div>
+                  <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Phone</label>
+                  <input
+                    type="text"
+                    value={selected.signature.phone || ''}
+                    onChange={(e) => onUpdate(selected.id, { signature: { ...selected.signature, phone: e.target.value } })}
+                    placeholder="e.g., +1 (555) 123-4567"
+                    className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'} focus:outline-none`}
+                  />
+                </div>
+                <div>
+                  <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Website</label>
+                  <input
+                    type="text"
+                    value={selected.signature.website || ''}
+                    onChange={(e) => onUpdate(selected.id, { signature: { ...selected.signature, website: e.target.value } })}
+                    placeholder="e.g., www.company.com"
+                    className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'} focus:outline-none`}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Custom HTML (optional)</label>
+                  <textarea
+                    value={selected.signature.customHtml || ''}
+                    onChange={(e) => onUpdate(selected.id, { signature: { ...selected.signature, customHtml: e.target.value } })}
+                    placeholder="<p>Your custom signature HTML...</p>"
+                    className={`w-full rounded-lg px-3 py-2 text-sm border resize-none h-20 ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400'} focus:outline-none font-mono`}
+                  />
+                </div>
+              </div>
+              
+              {/* Signature Preview */}
+              <div className={`mt-4 p-4 rounded-lg border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+                <p className={`text-xs font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Preview:</p>
+                <div className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-line`}>
+                  {selected.signature.name}
+                  {selected.signature.title && `\n${selected.signature.title}`}
+                  {selected.signature.company && `\n${selected.signature.company}`}
+                  {selected.signature.phone && `\n📱 ${selected.signature.phone}`}
+                  {selected.signature.website && `\n🌐 ${selected.signature.website}`}
+                </div>
               </div>
             </div>
 
