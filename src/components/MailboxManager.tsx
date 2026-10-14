@@ -259,13 +259,37 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
   const [type, setType] = useState<MailboxType>('gmail');
   const [agentName, setAgentName] = useState('');
   const [agentEmoji, setAgentEmoji] = useState(AGENT_EMOJIS[Math.floor(Math.random() * AGENT_EMOJIS.length)]);
+  const [agentColor, setAgentColor] = useState('#3b82f6');
+  const [company, setCompany] = useState('');
+  const [priority, setPriority] = useState<'critical' | 'high' | 'normal' | 'low'>('normal');
+  const [refreshSchedule, setRefreshSchedule] = useState<'realtime' | '5min' | '15min' | '30min' | '1hour' | 'manual'>('15min');
+  
+  // IMAP settings
   const [imapHost, setImapHost] = useState('');
   const [imapPort, setImapPort] = useState(993);
-  const [company, setCompany] = useState('');
+  const [imapUsername, setImapUsername] = useState('');
+  const [imapPassword, setImapPassword] = useState('');
+  const [smtpHost, setSmtpHost] = useState('');
+  const [smtpPort, setSmtpPort] = useState(587);
+  
+  // Signature
+  const [sigName, setSigName] = useState('');
+  const [sigTitle, setSigTitle] = useState('');
+  const [sigCompany, setSigCompany] = useState('');
+  const [sigPhone, setSigPhone] = useState('');
+  const [sigWebsite, setSigWebsite] = useState('');
+  
+  // Automation
+  const [autoReply, setAutoReply] = useState(false);
+  const [autoArchive, setAutoArchive] = useState(false);
+  const [autoCategorize, setAutoCategorize] = useState(true);
+  const [escalateUrgent, setEscalateUrgent] = useState(false);
+  const [notifySlack, setNotifySlack] = useState(false);
+  const [notifyPush, setNotifyPush] = useState(true);
 
   const handleSubmit = () => {
     if (!name || !email || !agentName) return;
-    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#22c55e', '#f97316', '#06b6d4', '#ef4444', '#14b8a6'];
+    
     onAdd({
       id: `mb${Date.now()}`,
       name,
@@ -273,38 +297,44 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
       type,
       agentName,
       agentEmoji,
-      agentColor: colors[Math.floor(Math.random() * colors.length)],
+      agentColor,
       agentPersonality: 'Helpful and efficient.',
-      refreshSchedule: '15min',
+      refreshSchedule,
       lastChecked: new Date().toISOString(),
       nextCheck: new Date(Date.now() + 15 * 60000).toISOString(),
       status: 'active',
       unreadCount: 0,
       totalEmails: 0,
       actionsToday: 0,
-      autoReply: false,
-      autoArchive: false,
-      autoCategorize: true,
-      escalateUrgent: false,
-      notifySlack: false,
-      notifyPush: true,
+      autoReply,
+      autoArchive,
+      autoCategorize,
+      escalateUrgent,
+      notifySlack,
+      notifyPush,
       ...(type === 'imap' || type === 'custom' ? {
         imapConfig: {
           host: imapHost,
           port: imapPort,
-          username: email,
-          password: '',
+          username: imapUsername || email,
+          password: imapPassword,
           ssl: true,
           folders: ['INBOX'],
-          smtpHost: '',
-          smtpPort: 587,
-          smtpUsername: email,
-          smtpPassword: '',
+          smtpHost,
+          smtpPort,
+          smtpUsername: imapUsername || email,
+          smtpPassword: imapPassword,
           smtpSsl: true,
         }
       } : {}),
-      priority: 'normal',
-      signature: { name: agentName },
+      priority,
+      signature: { 
+        name: sigName || agentName,
+        title: sigTitle,
+        company: sigCompany,
+        phone: sigPhone,
+        website: sigWebsite,
+      },
       replyPrefix: 'On {date}, {from} wrote:',
       outOfOffice: {
         enabled: false,
@@ -320,86 +350,146 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
     });
   };
 
+  const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#22c55e', '#f97316', '#06b6d4', '#ef4444', '#14b8a6', '#6366f1', '#f59e0b'];
+
   return (
-    <div className={`${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border rounded-xl p-6 mb-6`}>
+    <div className={`${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'} border rounded-xl p-6 mb-6 max-h-[80vh] overflow-y-auto`}>
       <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
         ✨ Add New Mailbox ({30 - existingCount} slots remaining)
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Mailbox Name *</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Work Gmail, Client Support"
-            className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
-          />
-        </div>
-        <div>
-          <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Email Address *</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your@email.com"
-            className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
-          />
-        </div>
-        <div>
-          <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Provider Type</label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as MailboxType)}
-            className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
-          >
-            <option value="gmail">Gmail (Google)</option>
-            <option value="outlook">Outlook / Hotmail</option>
-            <option value="imap">IMAP (Custom Server)</option>
-            <option value="yahoo">Yahoo Mail</option>
-            <option value="icloud">iCloud Mail</option>
-            <option value="custom">Custom / Other</option>
-          </select>
-        </div>
-        <div>
-          <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Agent Name *</label>
-          <input
-            type="text"
-            value={agentName}
-            onChange={(e) => setAgentName(e.target.value)}
-            placeholder="e.g., Rita, Theta, Max"
-            className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
-          />
-        </div>
-        <div>
-          <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Company / Group</label>
-          <input
-            type="text"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            placeholder="e.g., TechCorp Inc., Personal"
-            className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
-          />
-        </div>
-        <div>
-          <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Agent Avatar</label>
-          <div className="flex flex-wrap gap-1">
-            {AGENT_EMOJIS.slice(0, 12).map(emoji => (
-              <button
-                key={emoji}
-                onClick={() => setAgentEmoji(emoji)}
-                className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-all ${
-                  agentEmoji === emoji ? 'ring-2 scale-110' : isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
-                }`}
-                style={agentEmoji === emoji ? { outline: `2px solid ${theme.accentColor}`, background: `${theme.accentColor}20` } : {}}
-              >
-                {emoji}
-              </button>
-            ))}
+
+      {/* Section 1: Basic Info */}
+      <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+        <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>📧 Basic Information</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Mailbox Name *</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., Work Gmail, Client Support"
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Email Address *</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Provider Type</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as MailboxType)}
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            >
+              <option value="gmail">Gmail (Google)</option>
+              <option value="outlook">Outlook / Hotmail</option>
+              <option value="imap">IMAP (Custom Server)</option>
+              <option value="yahoo">Yahoo Mail</option>
+              <option value="icloud">iCloud Mail</option>
+              <option value="custom">Custom / Other</option>
+            </select>
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Company / Group</label>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              placeholder="e.g., TechCorp Inc., Personal"
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
           </div>
         </div>
-        {(type === 'imap' || type === 'custom') && (
-          <>
+      </div>
+
+      {/* Section 2: Agent Configuration */}
+      <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+        <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>🤖 Agent Configuration</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Agent Name *</label>
+            <input
+              type="text"
+              value={agentName}
+              onChange={(e) => setAgentName(e.target.value)}
+              placeholder="e.g., Rita, Theta, Max"
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Agent Color</label>
+            <div className="flex flex-wrap gap-2">
+              {colors.map(color => (
+                <button
+                  key={color}
+                  onClick={() => setAgentColor(color)}
+                  className={`w-8 h-8 rounded-full transition-transform ${agentColor === color ? 'ring-2 ring-offset-2 scale-110' : 'hover:scale-110'}`}
+                  style={{ background: color }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="md:col-span-2">
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Agent Avatar</label>
+            <div className="flex flex-wrap gap-1">
+              {AGENT_EMOJIS.slice(0, 12).map(emoji => (
+                <button
+                  key={emoji}
+                  onClick={() => setAgentEmoji(emoji)}
+                  className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-all ${
+                    agentEmoji === emoji ? 'ring-2 scale-110' : isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'
+                  }`}
+                  style={agentEmoji === emoji ? { outline: `2px solid ${agentColor}`, background: `${agentColor}20` } : {}}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Priority Level</label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as any)}
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            >
+              <option value="critical">🔴 Critical</option>
+              <option value="high">🟠 High</option>
+              <option value="normal">🟢 Normal</option>
+              <option value="low">⚪ Low</option>
+            </select>
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Refresh Schedule</label>
+            <select
+              value={refreshSchedule}
+              onChange={(e) => setRefreshSchedule(e.target.value as any)}
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            >
+              <option value="realtime">Real-time (push)</option>
+              <option value="5min">Every 5 minutes</option>
+              <option value="15min">Every 15 minutes</option>
+              <option value="30min">Every 30 minutes</option>
+              <option value="1hour">Every hour</option>
+              <option value="manual">Manual only</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3: IMAP Configuration (conditional) */}
+      {(type === 'imap' || type === 'custom') && (
+        <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+          <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>🖥️ IMAP/SMTP Configuration</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>IMAP Host</label>
               <input
@@ -407,7 +497,7 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
                 value={imapHost}
                 onChange={(e) => setImapHost(e.target.value)}
                 placeholder="imap.example.com"
-                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
               />
             </div>
             <div>
@@ -416,12 +506,125 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
                 type="number"
                 value={imapPort}
                 onChange={(e) => setImapPort(Number(e.target.value))}
-                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
+                placeholder="993"
+                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
               />
             </div>
-          </>
-        )}
+            <div>
+              <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>IMAP Username</label>
+              <input
+                type="text"
+                value={imapUsername}
+                onChange={(e) => setImapUsername(e.target.value)}
+                placeholder={email || "your@email.com"}
+                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+              />
+            </div>
+            <div>
+              <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>IMAP Password</label>
+              <input
+                type="password"
+                value={imapPassword}
+                onChange={(e) => setImapPassword(e.target.value)}
+                placeholder="••••••••"
+                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+              />
+            </div>
+            <div>
+              <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>SMTP Host</label>
+              <input
+                type="text"
+                value={smtpHost}
+                onChange={(e) => setSmtpHost(e.target.value)}
+                placeholder="smtp.example.com"
+                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+              />
+            </div>
+            <div>
+              <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>SMTP Port</label>
+              <input
+                type="number"
+                value={smtpPort}
+                onChange={(e) => setSmtpPort(Number(e.target.value))}
+                placeholder="587"
+                className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Section 4: Signature */}
+      <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+        <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>✍️ Email Signature</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Name</label>
+            <input
+              type="text"
+              value={sigName}
+              onChange={(e) => setSigName(e.target.value)}
+              placeholder={agentName || "Your Name"}
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Title</label>
+            <input
+              type="text"
+              value={sigTitle}
+              onChange={(e) => setSigTitle(e.target.value)}
+              placeholder="e.g., Senior Developer"
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Company</label>
+            <input
+              type="text"
+              value={sigCompany}
+              onChange={(e) => setSigCompany(e.target.value)}
+              placeholder="e.g., TechCorp Inc."
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+          <div>
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Phone</label>
+            <input
+              type="text"
+              value={sigPhone}
+              onChange={(e) => setSigPhone(e.target.value)}
+              placeholder="+1 (555) 123-4567"
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} block mb-1`}>Website</label>
+            <input
+              type="text"
+              value={sigWebsite}
+              onChange={(e) => setSigWebsite(e.target.value)}
+              placeholder="www.example.com"
+              className={`w-full rounded-lg px-3 py-2 text-sm border ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none`}
+            />
+          </div>
+        </div>
       </div>
+
+      {/* Section 5: Automation Settings */}
+      <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
+        <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>⚡ Automation Settings</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <Toggle label="Auto-reply" checked={autoReply} onChange={setAutoReply} theme={theme} />
+          <Toggle label="Auto-archive" checked={autoArchive} onChange={setAutoArchive} theme={theme} />
+          <Toggle label="Auto-categorize" checked={autoCategorize} onChange={setAutoCategorize} theme={theme} />
+          <Toggle label="Escalate urgent" checked={escalateUrgent} onChange={setEscalateUrgent} theme={theme} />
+          <Toggle label="Slack notify" checked={notifySlack} onChange={setNotifySlack} theme={theme} />
+          <Toggle label="Push notify" checked={notifyPush} onChange={setNotifyPush} theme={theme} />
+        </div>
+      </div>
+
+      {/* Buttons */}
       <div className="flex gap-3 mt-5">
         <button
           onClick={handleSubmit}
