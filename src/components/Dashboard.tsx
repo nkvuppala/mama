@@ -11,10 +11,11 @@ interface DashboardProps {
   onRefreshMailbox: (id: string) => void;
   onSelectMailbox: (id: string) => void;
   onRenameCompany: (oldName: string, newName: string) => void;
+  onAddMailbox: () => void;
   theme: ThemeConfig;
 }
 
-export default function Dashboard({ mailboxes, emails, actionLog, totalUnread, activeAgents, totalActions, onRefreshMailbox, onSelectMailbox, onRenameCompany, theme }: DashboardProps) {
+export default function Dashboard({ mailboxes, emails, actionLog, totalUnread, activeAgents, totalActions, onRefreshMailbox, onSelectMailbox, onRenameCompany, onAddMailbox, theme }: DashboardProps) {
   const isDark = theme.mode === 'dark';
   const cardBg = isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200';
   const subtext = isDark ? 'text-gray-500' : 'text-gray-500';
@@ -56,6 +57,7 @@ export default function Dashboard({ mailboxes, emails, actionLog, totalUnread, a
             📮 Your Mailboxes ({mailboxes.length})
           </h2>
           <button 
+            onClick={onAddMailbox}
             className="text-sm px-4 py-2 rounded-lg text-white font-medium transition-colors hover:opacity-90"
             style={{ background: theme.accentColor }}
           >

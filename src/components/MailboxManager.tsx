@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mailbox, MailboxType, RefreshSchedule, ThemeConfig, AGENT_EMOJIS } from '../types';
 
 interface MailboxManagerProps {
@@ -8,14 +8,23 @@ interface MailboxManagerProps {
   onUpdate: (id: string, updates: Partial<Mailbox>) => void;
   onRefresh: (id: string) => void;
   onRenameCompany: (oldName: string, newName: string) => void;
+  showAddMailbox?: boolean;
+  onCloseAddMailbox?: () => void;
   theme: ThemeConfig;
 }
 
-export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, onRefresh, onRenameCompany, theme }: MailboxManagerProps) {
+export default function MailboxManager({ mailboxes, onAdd, onRemove, onUpdate, onRefresh, onRenameCompany, showAddMailbox, onCloseAddMailbox, theme }: MailboxManagerProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const isDark = theme.mode === 'dark';
   const cardBg = isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200';
+
+  // Open add form when triggered from dashboard
+  useEffect(() => {
+    if (showAddMailbox) {
+      setShowAddForm(true);
+    }
+  }, [showAddMailbox]);
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
@@ -621,6 +630,86 @@ function AddMailboxForm({ onAdd, onCancel, existingCount, theme }: {
           <Toggle label="Escalate urgent" checked={escalateUrgent} onChange={setEscalateUrgent} theme={theme} />
           <Toggle label="Slack notify" checked={notifySlack} onChange={setNotifySlack} theme={theme} />
           <Toggle label="Push notify" checked={notifyPush} onChange={setNotifyPush} theme={theme} />
+        </div>
+      </div>
+
+      {/* Section 6: Authentication & Connection Test */}
+      <div className={`mb-6 p-4 rounded-lg border-2 ${isDark ? 'bg-blue-500/5 border-blue-500/30' : 'bg-blue-50 border-blue-200'}`}>
+        <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>🔐 Authentication & Connection</h4>
+        
+        {/* Read-Only Notice */}
+        <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-green-500/10 border border-green-500/30' : 'bg-green-50 border border-green-200'}`}>
+          <div className="flex items-start gap-2">
+            <span className="text-lg">🔒</span>
+            <div>
+              <p className={`text-xs font-semibold ${isDark ? 'text-green-400' : 'text-green-700'}`}>Read-Only Mode</p>
+              <p className={`text-xs mt-1 ${isDark ? 'text-green-400/70' : 'text-green-600'}`}>
+                MAMA only READS your emails. Nothing is deleted or modified on your server without explicit approval.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* OAuth for Gmail/Outlook */}
+        {(type === 'gmail' || type === 'outlook') && (
+          <div className="mb-4">
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+              {type === 'gmail' ? 'Google' : 'Microsoft'} OAuth Authentication:
+            </p>
+            <button
+              type="button"
+              className={`w-full px-4 py-3 rounded-lg font-medium text-sm transition-all ${
+                isDark 
+                  ? 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700' 
+                  : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
+              }`}
+            >
+              {type === 'gmail' ? '🔗 Connect with Google' : '🔗 Connect with Microsoft'}
+            </button>
+            <p className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              You'll be redirected to {type === 'gmail' ? 'Google' : 'Microsoft'} to authorize read-only access.
+            </p>
+          </div>
+        )}
+
+        {/* IMAP Test Connection */}
+        {(type === 'imap' || type === 'custom') && (
+          <div className="mb-4">
+            <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+              Test IMAP Connection:
+            </p>
+            <button
+              type="button"
+              disabled={!imapHost || !imapPassword}
+              className={`w-full px-4 py-3 rounded-lg font-medium text-sm transition-all ${
+                !imapHost || !imapPassword
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              } ${
+                isDark 
+                  ? 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700' 
+                  : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
+              }`}
+            >
+              🧪 Test Connection
+            </button>
+            <p className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              Verifies IMAP host, port, and credentials before saving.
+            </p>
+          </div>
+        )}
+
+        {/* Connection Status */}
+        <div className={`p-3 rounded-lg ${isDark ? 'bg-gray-800/50' : 'bg-white'}`}>
+          <p className={`text-xs font-medium mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            Connection Status:
+          </p>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            <span className={`text-xs ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>
+              Not connected - Complete authentication to connect
+            </span>
+          </div>
         </div>
       </div>
 

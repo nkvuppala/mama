@@ -7,6 +7,7 @@ import MailboxManager from './components/MailboxManager';
 import AgentConfig from './components/AgentConfig';
 import UnifiedInbox from './components/UnifiedInbox';
 import ThemeSettings from './components/ThemeSettings';
+import SetupWizard from './components/SetupWizard';
 
 type View = 'dashboard' | 'mailboxes' | 'agents' | 'inbox' | 'theme';
 
@@ -21,6 +22,8 @@ export default function App() {
     accentColor: '#3b82f6',
     accentName: 'Blue',
   });
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
+  const [showAddMailbox, setShowAddMailbox] = useState(false);
 
   // Apply theme to document
   useEffect(() => {
@@ -76,6 +79,7 @@ export default function App() {
         totalUnread={totalUnread}
         activeAgents={activeAgents}
         mailboxCount={mailboxes.length}
+        onShowSetup={() => setShowSetupWizard(true)}
         theme={theme}
       />
       
@@ -91,6 +95,7 @@ export default function App() {
             onRefreshMailbox={refreshMailbox}
             onSelectMailbox={(id: string) => { setSelectedMailboxId(id); setCurrentView('inbox'); }}
             onRenameCompany={renameCompany}
+            onAddMailbox={() => { setCurrentView('mailboxes'); setShowAddMailbox(true); }}
             theme={theme}
           />
         )}
@@ -102,6 +107,8 @@ export default function App() {
             onUpdate={updateMailbox}
             onRefresh={refreshMailbox}
             onRenameCompany={renameCompany}
+            showAddMailbox={showAddMailbox}
+            onCloseAddMailbox={() => setShowAddMailbox(false)}
             theme={theme}
           />
         )}
@@ -130,6 +137,14 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Setup Wizard */}
+      {showSetupWizard && (
+        <SetupWizard 
+          onComplete={() => setShowSetupWizard(false)}
+          theme={theme}
+        />
+      )}
     </div>
   );
 }

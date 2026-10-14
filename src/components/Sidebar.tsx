@@ -6,10 +6,11 @@ interface SidebarProps {
   totalUnread: number;
   activeAgents: number;
   mailboxCount: number;
+  onShowSetup?: () => void;
   theme: ThemeConfig;
 }
 
-export default function Sidebar({ currentView, setCurrentView, totalUnread, activeAgents, mailboxCount, theme }: SidebarProps) {
+export default function Sidebar({ currentView, setCurrentView, totalUnread, activeAgents, mailboxCount, onShowSetup, theme }: SidebarProps) {
   const isDark = theme.mode === 'dark';
   
   const navItems = [
@@ -73,6 +74,23 @@ export default function Sidebar({ currentView, setCurrentView, totalUnread, acti
         ))}
       </nav>
 
+      {/* Setup Guide Button */}
+      {onShowSetup && (
+        <div className={`p-3 border-t ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+          <button
+            onClick={onShowSetup}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              isDark 
+                ? 'text-gray-400 hover:text-white hover:bg-gray-800 border border-dashed border-gray-700'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-dashed border-gray-300'
+            }`}
+          >
+            <span className="text-lg">📖</span>
+            <span className="flex-1 text-left">Setup Guide</span>
+          </button>
+        </div>
+      )}
+
       {/* Status Footer */}
       <div className={`p-4 border-t ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
         <div className={`rounded-lg p-3 ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
@@ -88,6 +106,11 @@ export default function Sidebar({ currentView, setCurrentView, totalUnread, acti
           <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
             {totalUnread} unread emails
           </p>
+          <div className={`mt-2 pt-2 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+            <p className={`text-xs ${isDark ? 'text-green-400' : 'text-green-600'} flex items-center gap-1`}>
+              🔒 Read-only mode
+            </p>
+          </div>
         </div>
       </div>
     </aside>
