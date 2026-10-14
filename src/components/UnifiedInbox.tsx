@@ -14,8 +14,6 @@ interface UnifiedInboxProps {
 
 export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onSelectMailbox, onAction, onRenameCompany, theme }: UnifiedInboxProps) {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
-  const [replyText, setReplyText] = useState('');
-  const [showReply, setShowReply] = useState(false);
   const [showCompose, setShowCompose] = useState(false);
   const [composeReplyTo, setComposeReplyTo] = useState<Email | null>(null);
   const isDark = theme.mode === 'dark';
@@ -27,24 +25,10 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
 
   const getMailbox = (id: string) => mailboxes.find(m => m.id === id);
 
-  const handleQuickReply = () => {
-    if (!selectedEmail || !replyText.trim()) return;
-    const mb = getMailbox(selectedEmail.mailboxId);
-    onAction({
-      type: 'reply',
-      mailboxId: selectedEmail.mailboxId,
-      description: `${mb?.agentName || 'Agent'} replied to ${selectedEmail.from}`,
-      result: `"${replyText.slice(0, 60)}..."`,
-      status: 'completed'
-    });
-    setReplyText('');
-    setShowReply(false);
-  };
-
   const handleComposeSend = (composed: ComposedEmail) => {
     const mb = mailboxes.find(m => m.id === composed.fromMailboxId);
     onAction({
-      type: 'send',
+      type: 'send' as any,
       mailboxId: composed.fromMailboxId,
       description: `${mb?.agentName || 'Agent'} sent email to ${composed.to}`,
       result: `Subject: ${composed.subject}`,
@@ -58,7 +42,7 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden">
+    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
       {/* Compose Modal */}
       {showCompose && (
         <ComposeEmail
@@ -70,8 +54,8 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
         />
       )}
 
-      {/* Mailbox Filter Sidebar - Grouped by Company */}
-      <div className={`w-60 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800 bg-gray-900/50' : 'border-gray-200 bg-gray-50'}`}>
+      {/* Mailbox Filter Sidebar - Hidden on mobile */}
+      <div className={`hidden lg:block w-60 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800 bg-gray-900/50' : 'border-gray-200 bg-gray-50'}`}>
         <div className="p-3">
           <button
             onClick={() => onSelectMailbox(null)}
@@ -136,8 +120,8 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
         </div>
       </div>
 
-      {/* Email List */}
-      <div className={`w-96 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+      {/* Email List - Full width on mobile, fixed on desktop */}
+      <div className={`w-full lg:w-96 border-r shrink-0 overflow-y-auto ${isDark ? 'border-gray-800' : 'border-gray-200'} ${selectedEmail ? 'hidden lg:block' : ''}`}>
         <div className={`p-3 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
           <div className="flex items-center justify-between mb-2">
             <h2 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -206,109 +190,94 @@ export default function UnifiedInbox({ mailboxes, emails, selectedMailboxId, onS
         })}
       </div>
 
-      {/* Email Detail / Action Panel */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Email Detail - Full width on mobile when selected */}
+      <div className={`flex-1 overflow-y-auto ${!selectedEmail ? 'hidden lg:flex lg:flex-col' : 'flex flex-col'}`}>
         {selectedEmail ? (
-          <div className="p-6">
-            {/* Email Header */}
-            <div className="flex items-center gap-4 mb-6">
-              <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-white"
-                style={{ background: `linear-gradient(135deg, ${getMailbox(selectedEmail.mailboxId)?.agentColor || '#666'}, ${getMailbox(selectedEmail.mailboxId)?.agentColor || '#666'}aa)` }}
+          <div className="flex-1 flex flex-col">
+            {/* Mobile Back Button */}
+            <div className={`lg:hidden p-3 border-b flex items-center gap-2 ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+              <button
+                onClick={() => setSelectedEmail(null)}
+                className={`p-2 rounded-lg ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
               >
-                {selectedEmail.from[0]}
-              </div>
-              <div className="flex-1">
-                <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{selectedEmail.from}</p>
-                <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>{selectedEmail.fromEmail}</p>
-              </div>
-              <div className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                {new Date(selectedEmail.date).toLocaleString()}
-              </div>
+                ← Back
+              </button>
+              <h2 className={`font-semibold flex-1 truncate ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {selectedEmail.subject}
+              </h2>
             </div>
 
-            <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {selectedEmail.subject}
-            </h2>
-
-            <div className={`mb-6 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              <p className="leading-relaxed">{selectedEmail.body}</p>
-            </div>
-
-            {/* Agent Analysis */}
-            <div 
-              className="border rounded-xl p-4 mb-6"
-              style={{ 
-                background: `${getMailbox(selectedEmail.mailboxId)?.agentColor || theme.accentColor}10`,
-                borderColor: `${getMailbox(selectedEmail.mailboxId)?.agentColor || theme.accentColor}30`
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span>{getMailbox(selectedEmail.mailboxId)?.agentEmoji}</span>
-                <span className="text-sm font-semibold" style={{ color: getMailbox(selectedEmail.mailboxId)?.agentColor }}>
-                  {getMailbox(selectedEmail.mailboxId)?.agentName}'s Analysis
-                </span>
-              </div>
-              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{selectedEmail.agentSummary}</p>
-              {selectedEmail.agentAction && (
-                <p className={`text-sm mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  ⚡ {selectedEmail.agentAction}
-                </p>
-              )}
-            </div>
-
-            {/* Quick Actions */}
-            <div className={`${cardBg} border rounded-xl p-4 mb-6`}>
-              <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>⚡ Quick Actions</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                <QuickAction icon="✉️" label="Reply" onClick={handleReplyClick} theme={theme} />
-                <QuickAction icon="🔄" label="Forward" onClick={() => onAction({ type: 'forward', mailboxId: selectedEmail.mailboxId, description: `Forwarded: ${selectedEmail.subject}`, result: 'Forwarded to team', status: 'completed' })} theme={theme} />
-                <QuickAction icon="📅" label="Schedule" onClick={() => onAction({ type: 'schedule', mailboxId: selectedEmail.mailboxId, description: `Meeting scheduled re: ${selectedEmail.subject}`, result: 'Calendar invite sent', status: 'completed' })} theme={theme} />
-                <QuickAction icon="✅" label="Create Task" onClick={() => onAction({ type: 'task', mailboxId: selectedEmail.mailboxId, description: `Task from: ${selectedEmail.subject}`, result: 'Added to task board', status: 'completed' })} theme={theme} />
-                <QuickAction icon="🚨" label="Escalate" onClick={() => onAction({ type: 'escalate', mailboxId: selectedEmail.mailboxId, description: `Escalated: ${selectedEmail.subject}`, result: 'Team notified', status: 'completed' })} theme={theme} />
-                <QuickAction icon="📁" label="Archive" onClick={() => onAction({ type: 'organize', mailboxId: selectedEmail.mailboxId, description: `Archived: ${selectedEmail.subject}`, result: 'Moved to archive', status: 'completed' })} theme={theme} />
-              </div>
-            </div>
-
-            {/* Reply Box */}
-            {showReply && (
-              <div className={`${cardBg} border rounded-xl p-4`} style={{ borderColor: `${theme.accentColor}30` }}>
-                <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  ✉️ Reply via {getMailbox(selectedEmail.mailboxId)?.agentName}
-                </h4>
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Type your reply..."
-                  className={`w-full rounded-lg p-3 text-sm border resize-none h-24 ${isDark ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-gray-900'} focus:outline-none`}
-                />
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={handleQuickReply}
-                    className="px-4 py-2 rounded-lg text-white text-sm font-medium hover:opacity-90"
-                    style={{ background: theme.accentColor }}
-                  >
-                    📤 Send via Agent
-                  </button>
-                  <button
-                    onClick={() => setShowReply(false)}
-                    className={`px-4 py-2 rounded-lg text-sm ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
-                  >
-                    Cancel
-                  </button>
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+              {/* Email Header */}
+              <div className="flex items-center gap-4 mb-6">
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${getMailbox(selectedEmail.mailboxId)?.agentColor || '#666'}, ${getMailbox(selectedEmail.mailboxId)?.agentColor || '#666'}aa)` }}
+                >
+                  {selectedEmail.from[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{selectedEmail.from}</p>
+                  <p className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>{selectedEmail.fromEmail}</p>
+                </div>
+                <div className={`text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'} hidden sm:block`}>
+                  {new Date(selectedEmail.date).toLocaleString()}
                 </div>
               </div>
-            )}
+
+              <h2 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {selectedEmail.subject}
+              </h2>
+
+              <div className={`mb-6 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                <p className="leading-relaxed">{selectedEmail.body}</p>
+              </div>
+
+              {/* Agent Analysis */}
+              <div 
+                className="border rounded-xl p-4 mb-6"
+                style={{ 
+                  background: `${getMailbox(selectedEmail.mailboxId)?.agentColor || theme.accentColor}10`,
+                  borderColor: `${getMailbox(selectedEmail.mailboxId)?.agentColor || theme.accentColor}30`
+                }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span>{getMailbox(selectedEmail.mailboxId)?.agentEmoji}</span>
+                  <span className="text-sm font-semibold" style={{ color: getMailbox(selectedEmail.mailboxId)?.agentColor }}>
+                    {getMailbox(selectedEmail.mailboxId)?.agentName}'s Analysis
+                  </span>
+                </div>
+                <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{selectedEmail.agentSummary}</p>
+                {selectedEmail.agentAction && (
+                  <p className={`text-sm mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    ⚡ {selectedEmail.agentAction}
+                  </p>
+                )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className={`${cardBg} border rounded-xl p-4 mb-6`}>
+                <h4 className={`text-sm font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>⚡ Quick Actions</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <QuickAction icon="✉️" label="Reply" onClick={handleReplyClick} theme={theme} />
+                  <QuickAction icon="🔄" label="Forward" onClick={() => onAction({ type: 'forward', mailboxId: selectedEmail.mailboxId, description: `Forwarded: ${selectedEmail.subject}`, result: 'Forwarded to team', status: 'completed' })} theme={theme} />
+                  <QuickAction icon="📅" label="Schedule" onClick={() => onAction({ type: 'schedule', mailboxId: selectedEmail.mailboxId, description: `Meeting scheduled re: ${selectedEmail.subject}`, result: 'Calendar invite sent', status: 'completed' })} theme={theme} />
+                  <QuickAction icon="✅" label="Create Task" onClick={() => onAction({ type: 'task', mailboxId: selectedEmail.mailboxId, description: `Task from: ${selectedEmail.subject}`, result: 'Added to task board', status: 'completed' })} theme={theme} />
+                  <QuickAction icon="🚨" label="Escalate" onClick={() => onAction({ type: 'escalate', mailboxId: selectedEmail.mailboxId, description: `Escalated: ${selectedEmail.subject}`, result: 'Team notified', status: 'completed' })} theme={theme} />
+                  <QuickAction icon="📁" label="Archive" onClick={() => onAction({ type: 'organize', mailboxId: selectedEmail.mailboxId, description: `Archived: ${selectedEmail.subject}`, result: 'Moved to archive', status: 'completed' })} theme={theme} />
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full">
+          <div className="hidden lg:flex items-center justify-center h-full">
             <div className="text-center">
               <p className="text-5xl mb-4">📬</p>
               <p className={`text-lg font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Select an email to view
               </p>
               <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>
-                Choose from {filteredEmails.length} emails across {selectedMailboxId ? '1' : mailboxes.length} mailbox{selectedMailboxId ? '' : 'es'}
+                Choose from {filteredEmails.length} emails
               </p>
             </div>
           </div>

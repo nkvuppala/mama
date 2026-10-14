@@ -7,10 +7,12 @@ interface SidebarProps {
   activeAgents: number;
   mailboxCount: number;
   onShowSetup?: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   theme: ThemeConfig;
 }
 
-export default function Sidebar({ currentView, setCurrentView, totalUnread, activeAgents, mailboxCount, onShowSetup, theme }: SidebarProps) {
+export default function Sidebar({ currentView, setCurrentView, totalUnread, activeAgents, mailboxCount, onShowSetup, isOpen, onClose, theme }: SidebarProps) {
   const isDark = theme.mode === 'dark';
   
   const navItems = [
@@ -22,22 +24,45 @@ export default function Sidebar({ currentView, setCurrentView, totalUnread, acti
   ];
 
   return (
-    <aside className={`w-64 flex flex-col shrink-0 border-r ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
-      {/* Logo */}
-      <div className={`p-5 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
-        <div className="flex items-center gap-3">
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white font-bold"
-            style={{ background: `linear-gradient(135deg, ${theme.accentColor}, ${theme.accentColor}dd)` }}
-          >
-            ⚡
-          </div>
-          <div>
-            <h1 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>MAMA</h1>
-            <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Multi-Account Mail Agent</p>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      <aside className={`
+        fixed lg:relative z-50 lg:z-auto
+        w-64 h-full
+        flex flex-col shrink-0 border-r
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}
+      `}>
+        {/* Logo */}
+        <div className={`p-5 border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl text-white font-bold"
+              style={{ background: `linear-gradient(135deg, ${theme.accentColor}, ${theme.accentColor}dd)` }}
+            >
+              ⚡
+            </div>
+            <div className="flex-1">
+              <h1 className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>MAMA</h1>
+              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Multi-Account Mail Agent</p>
+            </div>
+            {/* Mobile Close Button */}
+            <button
+              onClick={onClose}
+              className={`lg:hidden p-2 rounded-lg ${isDark ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+              ✕
+            </button>
           </div>
         </div>
-      </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1">
@@ -114,5 +139,6 @@ export default function Sidebar({ currentView, setCurrentView, totalUnread, acti
         </div>
       </div>
     </aside>
+    </>
   );
 }
