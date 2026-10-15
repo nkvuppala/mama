@@ -128,6 +128,35 @@ export interface AgentAction {
   status: 'completed' | 'pending_approval' | 'failed' | 'sending';
 }
 
+export interface SearchFilters {
+  query: string;
+  mailboxIds: string[];
+  companies: string[];
+  dateRange: 'today' | 'week' | 'month' | 'all';
+  labels: string[];
+  unreadOnly: boolean;
+  starredOnly: boolean;
+}
+
+export interface SavedFilter {
+  id: string;
+  name: string;
+  filters: SearchFilters;
+}
+
+export interface AnalyticsData {
+  emailsProcessed: number;
+  repliesSent: number;
+  tasksCreated: number;
+  escalationsMade: number;
+  avgResponseTime: number; // in minutes
+  apiCost: number; // in USD
+  timeSaved: number; // in minutes
+  dailyStats: Array<{ date: string; count: number }>;
+  categoryBreakdown: Array<{ category: string; count: number; color: string }>;
+  agentPerformance: Array<{ agentName: string; emoji: string; color: string; emails: number; accuracy: number }>;
+}
+
 export interface ComposedEmail {
   to: string;
   cc?: string;

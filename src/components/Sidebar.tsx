@@ -18,6 +18,8 @@ export default function Sidebar({ currentView, setCurrentView, totalUnread, acti
   const navItems = [
     { id: 'dashboard', icon: '📊', label: 'Dashboard', badge: totalUnread },
     { id: 'inbox', icon: '📬', label: 'Unified Inbox', badge: totalUnread },
+    { id: 'search', icon: '🔍', label: 'Search' },
+    { id: 'analytics', icon: '📈', label: 'Analytics' },
     { id: 'mailboxes', icon: '📮', label: 'Mailboxes', badge: mailboxCount },
     { id: 'agents', icon: '🤖', label: 'Agents', badge: activeAgents },
     { id: 'theme', icon: '🎨', label: 'Appearance' },

@@ -8,8 +8,10 @@ import AgentConfig from './components/AgentConfig';
 import UnifiedInbox from './components/UnifiedInbox';
 import ThemeSettings from './components/ThemeSettings';
 import SetupWizard from './components/SetupWizard';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import AdvancedSearch from './components/AdvancedSearch';
 
-type View = 'dashboard' | 'mailboxes' | 'agents' | 'inbox' | 'theme';
+type View = 'dashboard' | 'mailboxes' | 'agents' | 'inbox' | 'theme' | 'analytics' | 'search';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -171,6 +173,19 @@ export default function App() {
           <ThemeSettings 
             theme={theme}
             onUpdate={setTheme}
+          />
+        )}
+        {currentView === 'analytics' && (
+          <AnalyticsDashboard 
+            mailboxes={mailboxes}
+            theme={theme}
+          />
+        )}
+        {currentView === 'search' && (
+          <AdvancedSearch 
+            mailboxes={mailboxes}
+            emails={emails}
+            theme={theme}
           />
         )}
       </main>
